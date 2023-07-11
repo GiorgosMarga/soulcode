@@ -1,0 +1,52 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+    provider        = "prisma-client-js"
+    previewFeatures = ["jsonProtocol"]
+}
+
+datasource db {
+    provider = "postgresql"
+    url      = env("DATABASE_URL")
+}
+
+model User {
+    id          String   @id @default(cuid())
+    username    String
+    email       String   @unique
+    password    String
+    role        Role     @default(USER)
+    isVerified  Boolean  @default(false)
+    otp         String   @default("")
+    otpDuration DateTime @default(now())
+    createdAt   DateTime @default(now())
+    avatar      String   @default("")
+    code        Code[]
+    updatedAt   DateTime @updatedAt
+    like        Like[]
+}
+
+model Like {
+    id     String @id @default(cuid())
+    user   User   @relation(fields: [userId], references: [id])
+    userId String
+    code   Code   @relation(fields: [codeId], references: [id])
+    codeId String
+}
+
+model Code {
+    id        String   @id @default(cuid())
+    user      User     @relation(fields: [userId], references: [id])
+    userId    String
+    language  String
+    content   String
+    updatedAt DateTime @updatedAt
+    createdAt DateTime @default(now())
+    like      Like[]
+}
+
+enum Role {
+    USER
+    ADMIN
+}
